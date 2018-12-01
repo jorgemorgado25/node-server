@@ -4,10 +4,15 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const Usuario = require('../models/usuario');
 
+//importo el middleware de verificar token
+const { verificaToken, isAdmin } = require('../middelwares/autenticacion');
+
 const app = express()
 
-app.get('/usuario', function (req, res) {
-    //res.json('get usuario');
+
+                    //uso aquí
+app.get('/usuario', verificaToken, (req, res) => {
+    
 
     let desde = req.query.desde || 0;
     let limite = req.query.limite || 5;
@@ -20,33 +25,33 @@ app.get('/usuario', function (req, res) {
 
       .skip(desde)
       .limit(limite)
-      .exec( (err, usuarios) =>{
+      .exec( (err, usuarios) => {
 
-        if (err){
-          return res.status(400).json({
-            ok: false,
-            err
+          if (err){
+            return res.status(400).json({
+              ok: false,
+              err
+            })
+          }
+
+          Usuario.countDocuments({estado: true}, (err, conteo) =>{
+
+            //Inserto la respuesta dentro
+
+              res.json({
+                ok: true,
+                usuarios,
+                cantidad: conteo
+              });
+          
           })
-        }
-
-        Usuario.countDocuments({estado: true}, (err, conteo) =>{
-
-          //Inserto la respuesta dentro
-
-            res.json({
-              ok: true,
-              usuarios,
-              cantidad: conteo
-            });
-        
-        })
 
         
       });
 
   })
   
-  app.post('/usuario', function (req, res) {
+  app.post('/usuario',[verificaToken, isAdmin], (req, res) =>{
     
     let body = req.body;
 
@@ -88,7 +93,7 @@ app.get('/usuario', function (req, res) {
     } */   
   })
   
-  app.put('/usuario/:id', function (req, res) {
+  app.put('/usuario/:id', [verificaToken, isAdmin], (req, res) => {
     let id = req.params.id;
     //let body = req.body;
     //delete body.password;
@@ -98,7 +103,7 @@ app.get('/usuario', function (req, res) {
 
     //paso new true para que devuelva la nueva información del usuario actualizado
     //run validatos para ejecutar las valaciones del modelo
-    Usuario.findByIdAndUpdate( id, body, {new: true, runValidators: true}, (err, usuarioDB) => {
+    Usuario.findByIdAndUpdate( id, body, {new: true, runValidators: true, context: 'query' }, (err, usuarioDB) => {
       if (err){
         return res.status(400).json({
           ok: false,
@@ -114,7 +119,7 @@ app.get('/usuario', function (req, res) {
     });
   })
   
-  app.delete('/usuario/:id', function (req, res) {
+  app.delete('/usuario/:id', [verificaToken, isAdmin], (req, res) => {
     
     let id = req.params.id;
 

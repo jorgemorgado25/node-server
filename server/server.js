@@ -20,8 +20,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
 
-//importu y uso las rutas del usuario
-app.use(require('./routes/usuario'));
+//importo y uso las rutas
+app.use(require('./routes/index'));
  
 
 
