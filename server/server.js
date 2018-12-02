@@ -1,5 +1,6 @@
-require('./config/config')
+require('./config/config');
 
+const path = require('path');
 const express = require('express')
 const mongoose = require('mongoose');
 const app = express()
@@ -22,7 +23,9 @@ app.use(bodyParser.json())
 
 //importo y uso las rutas
 app.use(require('./routes/index'));
- 
+
+//creo el directorio público
+app.use(express.static(path.resolve( __dirname, '../public' ))); 
 
 
 mongoose.connect(process.env.URLDB, { useNewUrlParser: true } , (err, res) => {
