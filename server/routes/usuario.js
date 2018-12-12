@@ -7,7 +7,7 @@ const Usuario = require('../models/usuario');
 //importo el middleware de verificar token
 const { verificaToken, isAdmin } = require('../middelwares/autenticacion');
 
-const app = express()
+const app = express();
 
 
                     //uso aquí
@@ -20,7 +20,7 @@ app.get('/usuario', verificaToken, (req, res) => {
     desde = Number(desde);
 
 
-    //excluir campos
+                                  //excluir campos
     Usuario.find({estado: true}, 'nombre email img')
 
       .skip(desde)
@@ -44,18 +44,14 @@ app.get('/usuario', verificaToken, (req, res) => {
                 cantidad: conteo
               });
           
-          })
-
-        
+          })        
       });
 
   })
   
-  app.post('/usuario',[verificaToken, isAdmin], (req, res) =>{
+  app.post('/usuario',(req, res) =>{
     
     let body = req.body;
-
-    console.log(body.nombre);
 
     let usuario = new Usuario({
       nombre: body.nombre,
@@ -71,8 +67,6 @@ app.get('/usuario', verificaToken, (req, res) => {
             err
           })
         }
-
-        //usuarioDB.password = null;
 
         res.json({
           ok: true,
@@ -96,13 +90,14 @@ app.get('/usuario', verificaToken, (req, res) => {
   app.put('/usuario/:id', [verificaToken, isAdmin], (req, res) => {
     let id = req.params.id;
     //let body = req.body;
-    //delete body.password;
+
+    //delete body.password; eliminar propiedades del body
     //delete body.google;
 
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
     //paso new true para que devuelva la nueva información del usuario actualizado
-    //run validatos para ejecutar las valaciones del modelo
+    //run validatos para ejecutar las valaciones del modelo (esquema)
     Usuario.findByIdAndUpdate( id, body, {new: true, runValidators: true, context: 'query' }, (err, usuarioDB) => {
       if (err){
         return res.status(400).json({
