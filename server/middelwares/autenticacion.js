@@ -38,7 +38,29 @@ let isAdmin = (req, res, next) =>{
     next();
 };
 
+let protejerImagenToken = (req, res, next) => {
+    token = req.query.token;
+
+    jwt.verify(token, process.env.SEED, (err, decoded) => {
+        //Si no es válido o ya expiró
+        if (err){
+            return res.status(401).json({
+                ok: false,
+                err:{
+                    name: 'JWT Error',
+                    message: 'Token Inválido'
+                }
+            });
+        }
+
+        //creo una nueva propiedad en el request, AQUÍ HAGO DISPONIBLE PARA TODOS
+        req.usuario = decoded.usuario;
+        next();
+    });
+}
+
 module.exports = {
     verificaToken,
-    isAdmin
+    isAdmin,
+    protejerImagenToken
 }
